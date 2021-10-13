@@ -1,7 +1,6 @@
 const socket = io();
 
 socket.on('listaProductos', (data) => {
-    console.log(data)
     render(data);
 });
 

@@ -1,4 +1,3 @@
-const fs = require('fs');
 const express = require('express');
 const Producto = require('./modules/producto.js');
 const { v4: uuidv4 } = require('uuid');
@@ -56,21 +55,23 @@ knexMariaDB.schema.hasTable('productos').then(exists => {
     }
 });
 
-(async ()=>{
-    try {
-        await knexSQLite3.schema.createTable('mensajes', table => {
+knexSQLite3.schema.hasTable('mensajes').then(exists => {
+    if (!exists) {
+        return knexSQLite3.schema.createTable('mensajes', table => {
             table.string('email'),
             table.string('texto'),
             table.string('fecha')
+        })
+        .then(()=>{
+            console.log('Tabla creada!');
+            knexSQLite3.destroy();
+        })
+        .catch(e=>{
+            console.log('Error en create de tabla:', e);
+            knexSQLite3.destroy();
         });
-        console.log('Tabla de mensajes creada...');
     }
-    catch(e) {
-        console.log('Error en proceso:', e);
-    }
-})();
-
-const mensajes = JSON.parse(fs.readFileSync('./content/mensajes.json', 'utf8'));
+});
 
 routerApi.get('/productos/listar', (req, res) => {
     knexMariaDB.from('productos').select('*')
